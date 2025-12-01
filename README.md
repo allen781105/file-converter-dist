@@ -2,6 +2,10 @@
 
 这是一个独立的微服务项目，专门用于将 PPT 和 PDF 文件转换为高质量的 PNG 图片。
 
+## 👀 效果预览
+
+![首页预览](screenshots/preview.png)
+
 ## 🌟 功能特性
 
 - **PPT 转图片**：将 .pptx 文件的每一页转换为图片（依赖 LibreOffice）
