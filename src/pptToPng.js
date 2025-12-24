@@ -28,6 +28,9 @@ const LIBREOFFICE_OPTIONS = {
 // 检测soffice路径（支持Mac和Linux）
 function getSofficePath() {
   const possiblePaths = [
+    // Windows路径
+    'C:\\Program Files\\LibreOffice\\program\\soffice.exe',
+    'C:\\Program Files (x86)\\LibreOffice\\program\\soffice.exe',
     // Linux路径（ECS服务器）
     '/usr/bin/soffice',
     '/usr/bin/libreoffice',
@@ -51,10 +54,11 @@ function getSofficePath() {
   
   // 尝试从命令行获取
   try {
-    const result = execSync('which soffice', { encoding: 'utf8' }).trim();
-    if (result) return result;
+    const cmd = process.platform === 'win32' ? 'where soffice' : 'which soffice';
+    const result = execSync(cmd, { encoding: 'utf8' }).trim().split('\n')[0];
+    if (result && fs.existsSync(result)) return result;
   } catch (e) {
-    // which命令失败
+    // 命令行查找失败
   }
   
   return null;
@@ -421,7 +425,43 @@ async function convertAndMergePpt(pptPath, outputDir, options = {}) {
     // 3. 根据输出模式进行合并
     const mergedImages = [];
     
-    if (outputMode === 'grid-2x2') {
+    if (outputMode === 'grid-1x2') {
+      // 二宫格模式：每2张图片合并为1x2网格
+      console.log('使用二宫格(1x2)模式...');
+      for (let i = 0; i < singleImages.length; i += 2) {
+        const group = singleImages.slice(i, i + 2);
+        
+        if (group.length > 0) {
+          const mergedFileName = `grid-1x2-${Math.floor(i / 2) + 1}.png`;
+          const mergedPath = path.join(outputDir, mergedFileName);
+          
+          await mergeGridImages(group, mergedPath, { 
+            spacing, 
+            gridCols: 2,
+            backgroundColor: '#ffffff'
+          });
+          mergedImages.push(mergedPath);
+        }
+      }
+    } else if (outputMode === 'grid-2x1') {
+      // 二宫格模式（竖排）：每2张图片合并为2x1网格
+      console.log('使用二宫格(2x1-竖排)模式...');
+      for (let i = 0; i < singleImages.length; i += 2) {
+        const group = singleImages.slice(i, i + 2);
+        
+        if (group.length > 0) {
+          const mergedFileName = `grid-2x1-${Math.floor(i / 2) + 1}.png`;
+          const mergedPath = path.join(outputDir, mergedFileName);
+          
+          await mergeGridImages(group, mergedPath, { 
+            spacing, 
+            gridCols: 1,
+            backgroundColor: '#ffffff'
+          });
+          mergedImages.push(mergedPath);
+        }
+      }
+    } else if (outputMode === 'grid-2x2') {
       // 四宫格模式：每4张图片合并为2x2网格
       console.log('使用四宫格(2x2)模式...');
       for (let i = 0; i < singleImages.length; i += 4) {

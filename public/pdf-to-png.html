@@ -321,6 +321,8 @@
           <select id="outputMode" style="width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 8px; margin-top: 5px;">
             <option value="single">单张输出（每页独立输出）</option>
             <option value="long">长图模式（多张纵向合并）</option>
+            <option value="grid-1x2">二宫格模式（2张并排/横向）</option>
+            <option value="grid-2x1">二宫格模式（2张竖排/纵向）</option>
             <option value="grid-2x2">四宫格模式（2x2 网格）</option>
             <option value="grid-3x3">九宫格模式（3x3 网格）</option>
           </select>
@@ -420,7 +422,7 @@
         longModeOptions.style.display = 'block';
         spacingOptions.style.display = 'block';
         aspectRatioOptions.style.display = 'block';
-      } else if (mode === 'grid-2x2' || mode === 'grid-3x3') {
+      } else if (mode === 'grid-1x2' || mode === 'grid-2x1' || mode === 'grid-2x2' || mode === 'grid-3x3') {
         // 宫格模式：只显示间距
         spacingOptions.style.display = 'block';
       }
@@ -497,7 +499,7 @@
         if (aspectRatioSelect.value) {
           formData.append('aspectRatio', aspectRatioSelect.value);
         }
-      } else if (currentMode === 'grid-2x2' || currentMode === 'grid-3x3') {
+      } else if (currentMode === 'grid-1x2' || currentMode === 'grid-2x1' || currentMode === 'grid-2x2' || currentMode === 'grid-3x3') {
         // 宫格模式
         formData.append('spacing', spacingRange.value);
       }
@@ -509,6 +511,8 @@
       let statusMsg = '正在转换PDF，请稍候...';
       if (currentMode === 'long') {
         statusMsg = `正在转换PDF并合并为长图（每${mergeCountRange.value}张合并），请稍候...`;
+      } else if (currentMode === 'grid-1x2' || currentMode === 'grid-2x1') {
+        statusMsg = '正在转换PDF并生成二宫格图片，请稍候...';
       } else if (currentMode === 'grid-2x2') {
         statusMsg = '正在转换PDF并生成四宫格图片，请稍候...';
       } else if (currentMode === 'grid-3x3') {
@@ -530,7 +534,9 @@
 
         // 根据输出模式显示不同的消息
         let successMsg = `转换成功！`;
-        if (currentMode === 'grid-2x2') {
+        if (currentMode === 'grid-1x2' || currentMode === 'grid-2x1') {
+          successMsg += `\n生成 ${data.mergedCount} 张二宫格图片 + ${data.singleCount} 张单张图片`;
+        } else if (currentMode === 'grid-2x2') {
           successMsg += `\n生成 ${data.mergedCount} 张四宫格图片 + ${data.singleCount} 张单张图片`;
         } else if (currentMode === 'grid-3x3') {
           successMsg += `\n生成 ${data.mergedCount} 张九宫格图片 + ${data.singleCount} 张单张图片`;
@@ -565,7 +571,9 @@
       if (data.mergedImages && data.mergedImages.length > 0) {
         const mode = outputMode.value;
         let mergedTitle = '合并图片';
-        if (mode === 'grid-2x2') {
+        if (mode === 'grid-1x2' || mode === 'grid-2x1') {
+          mergedTitle = '二宫格图片';
+        } else if (mode === 'grid-2x2') {
           mergedTitle = '四宫格图片';
         } else if (mode === 'grid-3x3') {
           mergedTitle = '九宫格图片';
@@ -605,7 +613,13 @@
           const mode = outputMode.value;
           let label = '合并图';
           let downloadPrefix = 'merged';
-          if (mode === 'grid-2x2') {
+          if (mode === 'grid-1x2') {
+            label = '二宫格(横)';
+            downloadPrefix = 'grid-1x2';
+          } else if (mode === 'grid-2x1') {
+            label = '二宫格(竖)';
+            downloadPrefix = 'grid-2x1';
+          } else if (mode === 'grid-2x2') {
             label = '四宫格';
             downloadPrefix = 'grid-2x2';
           } else if (mode === 'grid-3x3') {

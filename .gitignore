@@ -5,4 +5,4 @@ uploads/*
 outputs/*
 !outputs/.gitkeep
 .env
-
+dist/*

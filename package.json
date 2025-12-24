@@ -2,10 +2,14 @@
   "name": "ppt-pdf-to-png-service",
   "version": "1.0.0",
   "description": "A standalone service for converting PPT/PDF files to PNG images with various layout options",
-  "main": "server.js",
+  "main": "src/electron-main.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "electron:dev": "electron .",
+    "electron:build": "electron-builder",
+    "rebuild": "electron-rebuild",
+    "rebuild:node": "npm rebuild canvas"
   },
   "dependencies": {
     "dayjs": "^1.11.10",
@@ -19,7 +23,33 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
+    "@electron/rebuild": "^3.2.13",
+    "electron": "^28.2.0",
+    "electron-builder": "^24.9.1",
+    "node-gyp": "^10.0.1",
     "nodemon": "^3.0.2"
+  },
+  "build": {
+    "appId": "com.fileconverter.app",
+    "productName": "FileConverter",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "files": [
+      "**/*",
+      "!dist/*",
+      "!outputs/*",
+      "!uploads/*"
+    ]
   },
   "engines": {
     "node": ">=16.0.0"
